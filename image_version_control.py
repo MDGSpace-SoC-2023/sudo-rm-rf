@@ -9,6 +9,19 @@ from skimage.metrics import structural_similarity as ssim
 class ImageGraph:
     def __init__(self):
         self.graph = nx.DiGraph()
+        self.parent_v=None
+
+    def add_parent(self,image_path):
+        if self.parent_v is None:
+            self.graph.add_node(
+                1,
+                image_path=image_path,
+                version_number=1,
+
+            )
+        else:
+            raise Exception("Parent version already exist")
+            
 
     def add_version(self, parent_version, image_path):
         version_id = len(self.graph.nodes) + 1
@@ -39,6 +52,17 @@ image_graph = ImageGraph()
 @click.group()
 def cli():
     pass
+
+
+@cli.command()
+@click.option("--image-path", type=click.Path(exists=True), help="Path to the image file")
+def parentadd(image_path):
+    if image_path is None or not os.path.isfile(image_path):
+        click.echo("Error: Invalid image path.")
+        return
+    image_graph.add_parent(image_path)
+    click.echo(f"Node created with parent version XX and image path: {image_path}")
+
 
 @cli.command()
 @click.argument("parent_version", default=None)
