@@ -1,51 +1,36 @@
 import pickle
-from PIL import Image
-import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
+
+def  save_graph(object_instance):
+    name=object_instance.graph_name
+    path="Graphs/"+name+".pkl"
+
+    with open(path, 'wb') as output:
+       pickle.dump(object_instance,output,pickle.HIGHEST_PROTOCOL)
 
 
-#for saving the instance of ImageGraph class
+def load_graph(graph_name):
 
-'''input -> instance of ImageGraph object'''
+    '''
+    function to load imageGraph object from pickle file
 
-class GraphSave:
-   _instance = None
+    input-> graph_name , graph_name attribute of imageGraph instance
+    output-> imageGraph object
+    '''
 
-   def __new__(cls, *args, **kwargs):
-       if cls._instance is None:
-           cls._instance = super(GraphSave, cls).__new__(cls, *args, **kwargs)
-       return cls._instance
-
-   def __init__(self)->None:
-       if not hasattr(self, 'counter'):
-           self.counter = 0
-
-   def savegraph(self, instance_ImageGraph):
-       filename = f'../Graphs/instance_{self.counter}.pkl'
-
-       with open(filename, 'wb') as f:
-           pickle.dump(instance_ImageGraph, f)
-
-       print(f"Graph : {str(instance_ImageGraph)} saved at {filename}")
-       self.counter += 1
-
-   def loadgraph(self,location):
-        with open(location,'rb') as f:
-            loaded_image_graph = pickle.load(f)
-            return loaded_image_graph
+    path="Graphs/"+graph_name+".pkl"
+    
+    with open(path,'rb') as input:
+        graph=pickle.load(input)
+    return graph
 
 
+def show_image(obj):
+   image_array= obj.image
 
-
-
-# function to create image array from its path
-def imp(path):
-    image = Image.open(path)
-    image_array = np.asarray(image)
-    return image_array 
-    #returns numpy array
-
-
-
-
+   plt.imshow(image_array)
+   plt.title("Displayed Image")
+   plt.show()
 
 

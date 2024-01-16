@@ -1,75 +1,188 @@
-from PIL import Image
-import io
+from Node import nodes
+from utils.pixels import image_to_array as itoa
+from utils.pixels import is_image_changed as iic
+from utils.helper import save_graph , load_graph, show_image
+import argparse
+import os
+import numpy as np
+import click
 
-class Version:
-    def __init__(self, version_id, changes, commit_message="", parent=None):
-        self.version_id = version_id
-        self.changes = changes
-        self.commit_message = commit_message
-        self.parent = parent
-        self.children = []
-        self.images = {}
 
-    def add_image(self, image_name, image_data):
-        self.images[image_name] = image_data
 
-    def get_image(self, image_name):
-        return self.images.get(image_name)
+def check_graph_initialise(name):
+    '''
+    To check if the image already has a graph.pkl file
+    cons:
+        - image name should not be changed
+    It searches name.pkl file in Graphs directory
 
-class ImageVersionControlSystem:
-    def __init__(self):
-        self.versions = {}
+    returns a bool value
+    '''
 
-    def create_version(self, version_id, changes, commit_message="", image_changes=None):
-        if version_id in self.versions:
-            print(f"Error: Version {version_id} already exists.")
-            return
+    _path="Graphs/"+name+".pkl"
+    check_file_existence=os.path.exists(_path)
 
-        parent_version = self.get_latest_version()
-        new_version = Version(version_id, changes, commit_message, parent_version)
+    return check_file_existence
 
-        if image_changes:
-            for image_name, image_data in image_changes.items():
-                new_version.add_image(image_name, image_data)
 
-        if parent_version:
-            parent_version.add_child(new_version)
-9
-        self.versions[version_id] = new_version
-        print(f"Created version {version_id} with changes: {changes}, Commit Message: {commit_message}")
+def create_root_node(image_path:str,
+                     author:str):
+    '''
+    Function to add a root node and initalise the graph
+    Takes image from image_path and convert into numpy.ndarray
+    Initalises graphImage with graph_name as image name
 
-    def get_latest_version(self):
-        if not self.versions:
-            return None
-        return max(self.versions.values(), key=lambda v: v.version_id)
+    Also, saves the graph at IVCS/Graphs/ using helper.save_graph
+    Checks if the same graph already exists
 
-    def print_version_history(self, version=None, indent=0):
-        if version is None:
-            version = self.get_latest_version()
+    inputs->[image_path,
+             author]
+    
+    '''
 
-        if version:
-            print("  " * indent + f"Version {version.version_id}: {version.changes}")
-            for child in version.children:
-                self.print_version_history(child, indent + 1)
+    _graph_name=(image_path.split('/')[-1]).split('.')[0]
+    _image=itoa(image_path)
 
-# Example usage with image changes:
-image_vc_system = ImageVersionControlSystem()
+    if(not check_graph_initialise(_graph_name)):
+        gr=nodes.imageGraph(image=_image,author=author,graph_name=_graph_name)
+        save_graph(gr)
+        print(f"The imageGraph has been initialised for {image_path} at Graphs/{_graph_name}")
 
-# Open and read image files
-image1 = Image.open("image1.jpg")
-image2 = Image.open("image2.jpg")
 
-# Convert images to bytes
-image_data1 = io.BytesIO()
-image1.save(image_data1, format="JPEG")
+    else:
+        raise Exception(f"The imageGraph for this image has already been initialised.")
 
-image_data2 = io.BytesIO()
-image2.save(image_data2, format="JPEG")
 
-# Create versions with image changes
-image_vc_system.create_version(1, "Initial commit", "First commit", {"image1.jpg": image_data1.getvalue()})
-image_vc_system.create_version(2, "Modify image1", "Fix bug", {"image1.jpg": image_data1.getvalue()})
-image_vc_system.create_version(3, "Add image2", "Add feature", {"image2.jpg": image_data2.getvalue()})
 
-# Print the version history
-image_vc_system.print_version_history()
+def add_new_node(imageGraph_instance:nodes.graphNode,
+                commit_message:str,
+                author:str,
+                image:np.ndarray):
+    '''
+    inputs->[imageGraph object, 
+             commit message,
+             author,
+             image]
+
+    Function to add a new node on the current head location in the nodes.imageGraph object
+    Expects an established graph which has a nodes.graphNode object
+    if the graph of the image has not been initalised, use create_root_node to initalise
+
+    returns a nodes.graphImage object, 
+    doesn't save the new graph
+    '''
+
+    head=imageGraph_instance.Head
+
+    if(iic(head.image, image)):
+        new_node=nodes.graphNode(
+                                image=image,
+                                author=author,
+                                in_nodes=head,
+                                commit_message=commit_message)
+        
+        head.out_nodes=(new_node)
+        imageGraph_instance.Head=new_node
+
+        return imageGraph_instance
+    else:
+        raise Exception(f"Image has not been changed with respect to the current location of the HEAD in the graphImage")
+        
+
+
+def revert_head_by_one_return_imageGraph(imageGraph_instance:nodes.imageGraph):
+    current_head=imageGraph_instance.Head
+    reverted_head=current_head.in_nodes
+
+    print(f"The head has been reverted to \n "
+         "unique: {reverted_head.unique} \n "
+         "message: {reverted_head.commit_message} by author :{reverted_head.author}")
+    
+    return imageGraph_instance
+
+
+def revert_by_one_save_imageGraph(image_path:str):
+    _imageGraph_path=image_path.split('/')[-1].split('.')[0]
+    _imageGraph_instance=load_graph(_imageGraph_path)
+    _imageGraph_instance=revert_head_by_one_return_imageGraph(_imageGraph_instance)
+    save_graph(_imageGraph_instance)
+
+
+
+def add_version(image_path:str,
+                author:str,
+                commit_message:str):
+    _image=itoa(image_path)
+    _graph_name=((image_path.split('/')[-1]).split('.'))[0]
+    _imageGraph_instance=load_graph(_graph_name)
+    _imageGraph_instance=add_new_node(imageGraph_instance=_imageGraph_instance,
+                                      image=_image,author=author,
+                                      commit_message=commit_message)
+    save_graph(_imageGraph_instance)
+
+def forward_head_by_one_return_imageGraph(imageGraph_instance:nodes.imageGraph):
+    _head=imageGraph_instance.Head
+    if(_head.out_nodes is not None):
+        imageGraph_instance.Head=_head.out_nodes
+
+    else:
+        raise Exception(f"There are no outgoing nodes from current HEAD")
+    
+def forward_head_by_one_save_imageGraph(image_path:str):
+    _imageGraph_path=image_path.split('/')[-1].split('.')[0]
+    _imageGraph_instance=load_graph(_imageGraph_path)
+    _imageGraph_path=forward_head_by_one_return_imageGraph(_imageGraph_instance)
+    save_graph(_imageGraph_instance)
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.argument('IMAGE_PATH')
+@click.option("--u", help="Author Name")
+def add(IMAGE_PATH,AUTHOR):
+    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
+       click.echo("Error: Invalid image path.")
+       return
+    else:
+        create_root_node(image_path=IMAGE_PATH,
+                        author=AUTHOR)
+    
+
+@cli.command()
+@click.argument('IMAGE_PATH')
+@click.option('--u',help="Author Name")
+@click.option('--m',help="Commit Message")
+def commit(IMAGE_PATH,AUTHOR,MESSAGE):
+
+    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
+       click.echo("Error: Invalid image path.")
+       return
+    else:
+        add_version(image_path=IMAGE_PATH,commit_message=MESSAGE,author=AUTHOR)
+        
+
+@cli.command()
+@click.argument('IMAGE_PATH')
+def revert(IMAGE_PATH):
+    
+    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
+       click.echo("Error: Invalid image path.")
+       return
+    else:
+        revert_by_one_save_imageGraph(image_path=IMAGE_PATH)
+
+
+@cli.command()
+@click.argument('IMAGE_PATH')
+def forward(IMAGE_PATH):
+    
+    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
+       click.echo("Error: Invalid image path.")
+       return
+    else:
+        forward_head_by_one_save_imageGraph (image_path=IMAGE_PATH)
+
