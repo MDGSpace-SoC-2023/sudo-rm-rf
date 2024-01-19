@@ -1,0 +1,26 @@
+[project]
+name = "PixV"
+version = "0.0.1"
+description = "Local Version Control System for Images"
+authors = [
+  { name = "Som Shekhar Sharma", email = "sharmathat@gmail.com" },
+  { name = "Dhruv Sagar", email = "dhruvsagar24nd@gmail.com"}
+]
+
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10.0"
+dependencies = [
+  "numpy=1.26.1",
+  "Pillow=10.0.1",
+  "matplotlib=3.8.2",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"

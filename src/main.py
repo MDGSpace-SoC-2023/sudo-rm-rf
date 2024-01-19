@@ -94,6 +94,8 @@ def revert_head_by_one_return_imageGraph(imageGraph_instance:nodes.imageGraph):
     current_head=imageGraph_instance.Head
     reverted_head=current_head.in_nodes
 
+    imageGraph_instance.Head=reverted_head
+
     print(f"The head has been reverted to \n "
          "unique: {reverted_head.unique} \n "
          "message: {reverted_head.commit_message} by author :{reverted_head.author}")
@@ -185,4 +187,6 @@ def forward(IMAGE_PATH):
        return
     else:
         forward_head_by_one_save_imageGraph (image_path=IMAGE_PATH)
+
+        
 

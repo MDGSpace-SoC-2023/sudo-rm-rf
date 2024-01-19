@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 import uuid
-
+from src.utils import Pixels
 import numpy as np
 from PIL import Image
 
@@ -57,9 +57,11 @@ class imageGraph:
 
 
 
-# path="/Users/somshekharsharma/Downloads/tsh.jpg"
+path="/Users/somshekharsharma/Downloads/tsh.jpg"
 
-# graph1=imageGraph(image=pixels.image_to_array(path),author="som")
+graph1=imageGraph(image=Pixels.image_to_array(path),author="som")
+
+print(type(graph1.Head))
 # node2
 # graph1.root_node.out_nodes=
 
