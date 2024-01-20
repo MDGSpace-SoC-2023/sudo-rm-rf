@@ -5,7 +5,6 @@ from Node import nodes
 
 
 
-
 def image_dimensions_return_list(image1:np.ndarray):
     '''
     Function to return the shape of the image in tuple
@@ -48,7 +47,7 @@ def changed_pixel_return_dict(image1:np.ndarray,
                 for k in _k:
                     if(image1[i][j][k]!=image2[i][j][k]):
                         _change=(image2[i][j][k])-image1[i][j][k]
-                        _dict.update({'pixel':[i,j,k],'change':_change})
+                        _dict.update({'pixel':(i,j,k),'change':_change})
                     else:
                         continue
         return _dict

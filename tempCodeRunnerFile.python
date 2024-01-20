@@ -1,0 +1,7 @@
+import copy
+a=5
+
+b=copy.copy(a)
+a+=1
+
+print(a,b)
