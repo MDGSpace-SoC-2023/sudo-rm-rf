@@ -95,7 +95,7 @@ class imageGraph:
 
         for key in _all_changes.keys():
             i,j,k=key
-            image[i][j][k]=_all_changes[key]   
+            image[i][j][k]+=_all_changes[key]   
         plt.imshow(image)
     
 
