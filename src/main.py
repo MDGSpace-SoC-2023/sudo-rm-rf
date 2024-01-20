@@ -1,6 +1,7 @@
 from Node import nodes
-from utils.pixels import image_to_array as itoa
-from utils.pixels import is_image_changed as iic
+from Node.diffs import changed_pixel_return_dict as cprd
+from utils.Pixels import image_to_array as itoa
+from utils.Pixels import is_image_changed as iic
 from utils.helper import save_graph , load_graph, show_image
 import argparse
 import os
@@ -54,7 +55,7 @@ def create_root_node(image_path:str,
 
 
 
-def add_new_node(imageGraph_instance:nodes.graphNode,
+def add_new_node(imageGraph_instance:nodes.imageGraph,
                 commit_message:str,
                 author:str,
                 image:np.ndarray):
@@ -67,23 +68,26 @@ def add_new_node(imageGraph_instance:nodes.graphNode,
     Function to add a new node on the current head location in the nodes.imageGraph object
     Expects an established graph which has a nodes.graphNode object
     if the graph of the image has not been initalised, use create_root_node to initalise
+    stores changes in the image in dict format
 
     returns a nodes.graphImage object, 
     doesn't save the new graph
     '''
 
-    head=imageGraph_instance.Head
+    _image_head=imageGraph_instance.return_np_image_at_head()
+    _head=imageGraph_instance.Head
+    # _image=imageGraph_instance.return_np_image_at_head()
+    if(iic(_image_head, image)):
+        _change_dict=cprd(_image_head,image)
 
-    if(iic(head.image, image)):
         new_node=nodes.graphNode(
-                                image=image,
+                                change=_change_dict,
                                 author=author,
-                                in_nodes=head,
+                                in_nodes=_head,
                                 commit_message=commit_message)
         
-        head.out_nodes=(new_node)
+        _head.out_nodes=new_node
         imageGraph_instance.Head=new_node
-
         return imageGraph_instance
     else:
         raise Exception(f"Image has not been changed with respect to the current location of the HEAD in the graphImage")

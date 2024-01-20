@@ -51,7 +51,10 @@ class rootNode(graphNode):
 
 
 class imageGraph:
-    def __init__(self,image,author,graph_name):
+    def __init__(self,
+                 image:np.ndarray,
+                 author:str,
+                 graph_name:str):
         self.root_node=rootNode(image=image,author=author,version_name=graph_name)
         self.Head=self.root_node #head kaha point kar raha hai
         self.graph_name=graph_name
@@ -87,6 +90,27 @@ class imageGraph:
         else:
             _all_changes={}
         return _all_changes
+    
+
+    def return_np_image_at_head(self):
+
+        '''
+
+        Function to return complete image in np.ndarray dtype at Head of imageGraph
+        this function is intended to be used to calculate the changes in the new version during a commit.
+        return image in np.ndarray format.
+        
+        
+        '''
+        _all_changes=imageGraph._traverse_graph()
+        image=self.image
+
+        for key in _all_changes.keys():
+            i,j,k=key
+            image[i][j][k]+=_all_changes[key]  
+
+        return image #np.ndarray
+
 
 
     def show_image(self):

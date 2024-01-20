@@ -23,8 +23,8 @@ def check_image_dimensions_return_bool(image1:np.ndarray,
     return (image1.shape==image2.shape)
 
 
-def changed_pixel_return_dict(image1:np.ndarray,
-                              image2:np.ndarray):
+def changed_pixel_return_dict(head_image:np.ndarray,
+                              new_image:np.ndarray):
 
     '''
     INPUT:-
@@ -38,15 +38,15 @@ def changed_pixel_return_dict(image1:np.ndarray,
     the value comprises of the decimal(float) value signifying the change in the pixel 
     '''
 
-    if(check_image_dimensions_return_bool(image1=image1,image2=image2)):
-        _shape=image_dimensions_return_list(image1)
+    if(check_image_dimensions_return_bool(image1=head_image,image2=new_image)):
+        _shape=image_dimensions_return_list(head_image)
         changes_dict={}
         _i,_j,_k=_shape
         for i in _i:
             for j in _j:
                 for k in _k:
-                    if(image1[i][j][k]!=image2[i][j][k]):
-                        _change=(image2[i][j][k])-image1[i][j][k]
+                    if(head_image[i][j][k]!=new_image[i][j][k]):
+                        _change=(new_image[i][j][k])-head_image[i][j][k]
                         changes_dict.update({'pixel':(i,j,k),'change':_change})
                     else:
                         continue
