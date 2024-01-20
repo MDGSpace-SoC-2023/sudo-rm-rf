@@ -40,37 +40,37 @@ def changed_pixel_return_dict(image1:np.ndarray,
 
     if(check_image_dimensions_return_bool(image1=image1,image2=image2)):
         _shape=image_dimensions_return_list(image1)
-        _dict={}
+        changes_dict={}
         _i,_j,_k=_shape
         for i in _i:
             for j in _j:
                 for k in _k:
                     if(image1[i][j][k]!=image2[i][j][k]):
                         _change=(image2[i][j][k])-image1[i][j][k]
-                        _dict.update({'pixel':(i,j,k),'change':_change})
+                        changes_dict.update({'pixel':(i,j,k),'change':_change})
                     else:
                         continue
-        return _dict
+        return changes_dict
     else:
         raise Exception(f"The dimensions of the image are not same. PixV isnt compatible with cropping and changing dimensions of image.")
     
 
 
 
-def Add_diffs_from_head_till_root(imageGraph_instance:nodes.imageGraph):
+# def Add_diffs_from_head_till_root(imageGraph_instance:nodes.imageGraph):
 
-    '''
-    Input->[nodes.imageGraph]
+#     '''
+#     Input->[nodes.imageGraph]
 
-    Function to add all the diffs at each node from head till root.
-    This function calculates the final image array at the current head.
-    However right now this function wont support any version wont have the same dimensions.
+#     Function to add all the diffs at each node from head till root.
+#     This function calculates the final image array at the current head.
+#     However right now this function wont support any version wont have the same dimensions.
 
-    output->[numpy.ndarray]
-    '''
+#     output->[numpy.ndarray]
+#     '''
 
-    _current_head_location=imageGraph_instance.Head
-    while(imageGraph_instance.in_nodes is not None):
+#     _current_head_location=imageGraph_instance.Head
+#     while(imageGraph_instance.in_nodes is not None):
         
 
-    pass
+#     pass
