@@ -56,6 +56,15 @@ class imageGraph:
         self.graph_name=graph_name
 
 
+    def _traverse_to_root(self):
+        _current_node= self.Head  
+        
+        while _current_node.in_nodes is not None:
+           _current_node = _current_node.in_nodes
+        return _current_node 
+     
+
+
 
 path="/Users/somshekharsharma/Downloads/tsh.jpg"
 
