@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <style>
+        /* Your CSS styles remain unchanged */
+        body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    /* background-image: url("R.jpeg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center; */
+}
+header {
+    background-color: #000000;
+    padding: 10px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+header img {
+    height: 100px;
+    border-radius: 10%;
+}
+nav {
+    display: flex;
+    color: #f0f8ff;
+    gap: 20px;
+}
+a:link {
+    color: red;
+    text-decoration: none;
+}
+
+a:visited {
+    color: rgb(255, 255, 255);
+}
+
+a:hover {
+    color: hotpink;
+}
+
+a:active {
+    color: blue;
+}
+
+.swapnil{
+    
+    padding-top: 80px;
+    padding-bottom: 100px;
+    background-image: url("p.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+}
+
+.register-panel {
+    margin: 150px auto;
+    color: white;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow:  10px 10px 10px 10px rgba(0, 0, 0, 1);
+    text-align: center;
+    backdrop-filter: blur(10000000px);
+}
+.register-panel input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #b0c4de;
+    border-radius: 4px;
+    outline: none;
+}
+
+.register-panel button {
+    background-color: #000000;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 15%;
+    cursor: pointer;
+}
+.login-link {
+    margin-top: 15px;
+    color: #ffffff;
+}
+.login-link a {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+}
+.login-link a:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <img src="change2.png" alt="Logo">
+    </header>
+
+    <div class="swapnil">
+        <div class="register-panel">
+            <h2>Register on PixV</h2>
+            <form id="registerForm">
+                <input type="text" id="fullname" placeholder="Full Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="button" onclick="register()">Register</button>
+            </form>
+            <div class="login-link">
+                <p>Already have an account? <a href="index.html">Login Now</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function register() {
+            const username = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            axios.post('/api/users/register', { username, email, password })
+                .then(response => {
+                    console.log(response.data);
+                    // Handle successful registration, e.g., redirect to login page
+                })
+                .catch(error => {
+                    console.error(error.response.data);
+                    // Handle registration error, e.g., display error message to user
+                });
+        }
+    </script>
+</body>
+</html>
