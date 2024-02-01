@@ -1,196 +1,35 @@
-from Node import nodes
-from Node.diffs import changed_pixel_return_dict as cprd
-from utils.Pixels import image_to_array as itoa
-from utils.Pixels import is_image_changed as iic
-from utils.helper import save_graph , load_graph, show_image
-import argparse
-import os
 import numpy as np
-import click
+from PIL import Image
+from utils import helper
+from matplotlib import pyplot as plt
+import cv2 as cv
 
+path = "/Users/somshekharsharma/Downloads/bkl2.png"
+path_graph = "/Users/somshekharsharma/Desktop/SOC/src/Graphs/bkl2.pkl"
 
+obj = helper.load_graph("bkl2")
 
-def check_graph_initialise(name):
-    '''
-    To check if the image already has a graph.pkl file
-    cons:
-        - image name should not be changed
-    It searches name.pkl file in Graphs directory
+# print(type(obj.Head.image))
+# print(obj.Head.image.dtype)  # Check the data type of the image array
 
-    returns a bool value
-    '''
+# # Convert image array to float32 if it's not already
+# img = obj.Head.image.astype(np.float32)
 
-    _path="Graphs/"+name+".pkl"
-    check_file_existence=os.path.exists(_path)
+# # Drop the fourth channel if present
+# img = img[:, :, :3]
 
-    return check_file_existence
-
-
-def create_root_node(image_path:str,
-                     author:str):
-    '''
-    Function to add a root node and initalise the graph
-    Takes image from image_path and convert into numpy.ndarray
-    Initalises graphImage with graph_name as image name
-
-    Also, saves the graph at IVCS/Graphs/ using helper.save_graph
-    Checks if the same graph already exists
-
-    inputs->[image_path,
-             author]
-    
-    '''
-
-    _graph_name=(image_path.split('/')[-1]).split('.')[0]
-    _image=itoa(image_path)
-
-    if(not check_graph_initialise(_graph_name)):
-        gr=nodes.imageGraph(image=_image,author=author,graph_name=_graph_name)
-        save_graph(gr)
-        print(f"The imageGraph has been initialised for {image_path} at Graphs/{_graph_name}")
-
-
-    else:
-        raise Exception(f"The imageGraph for this image has already been initialised.")
-
-
-
-def add_new_node(imageGraph_instance:nodes.imageGraph,
-                commit_message:str,
-                author:str,
-                image:np.ndarray):
-    '''
-    inputs->[imageGraph object, 
-             commit message,
-             author,
-             image]
-
-    Function to add a new node on the current head location in the nodes.imageGraph object
-    Expects an established graph which has a nodes.graphNode object
-    if the graph of the image has not been initalised, use create_root_node to initalise
-    stores changes in the image in dict format
-
-    returns a nodes.graphImage object, 
-    doesn't save the new graph
-    '''
-
-    _image_head=imageGraph_instance.return_np_image_at_head()
-    _head=imageGraph_instance.Head
-    # _image=imageGraph_instance.return_np_image_at_head()
-    if(iic(_image_head, image)):
-        _change_dict=cprd(_image_head,image)
-
-        new_node=nodes.graphNode(
-                                change=_change_dict,
-                                author=author,
-                                in_nodes=_head,
-                                commit_message=commit_message)
-        
-        _head.out_nodes=new_node
-        imageGraph_instance.Head=new_node
-        return imageGraph_instance
-    else:
-        raise Exception(f"Image has not been changed with respect to the current location of the HEAD in the graphImage")
-        
-
-
-def revert_head_by_one_return_imageGraph(imageGraph_instance:nodes.imageGraph):
-    current_head=imageGraph_instance.Head
-    reverted_head=current_head.in_nodes
-
-    imageGraph_instance.Head=reverted_head
-
-    print(f"The head has been reverted to \n "
-         "unique: {reverted_head.unique} \n "
-         "message: {reverted_head.commit_message} by author :{reverted_head.author}")
-    
-    return imageGraph_instance
-
-
-def revert_by_one_save_imageGraph(image_path:str):
-    _imageGraph_path=image_path.split('/')[-1].split('.')[0]
-    _imageGraph_instance=load_graph(_imageGraph_path)
-    _imageGraph_instance=revert_head_by_one_return_imageGraph(_imageGraph_instance)
-    save_graph(_imageGraph_instance)
-
-
-
-def add_version(image_path:str,
-                author:str,
-                commit_message:str):
-    _image=itoa(image_path)
-    _graph_name=((image_path.split('/')[-1]).split('.'))[0]
-    _imageGraph_instance=load_graph(_graph_name)
-    _imageGraph_instance=add_new_node(imageGraph_instance=_imageGraph_instance,
-                                      image=_image,author=author,
-                                      commit_message=commit_message)
-    save_graph(_imageGraph_instance)
-
-def forward_head_by_one_return_imageGraph(imageGraph_instance:nodes.imageGraph):
-    _head=imageGraph_instance.Head
-    if(_head.out_nodes is not None):
-        imageGraph_instance.Head=_head.out_nodes
-
-    else:
-        raise Exception(f"There are no outgoing nodes from current HEAD")
-    
-def forward_head_by_one_save_imageGraph(image_path:str):
-    _imageGraph_path=image_path.split('/')[-1].split('.')[0]
-    _imageGraph_instance=load_graph(_imageGraph_path)
-    _imageGraph_path=forward_head_by_one_return_imageGraph(_imageGraph_instance)
-    save_graph(_imageGraph_instance)
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@click.argument('IMAGE_PATH')
-@click.option("--u", help="Author Name")
-def add(IMAGE_PATH,AUTHOR):
-    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
-       click.echo("Error: Invalid image path.")
-       return
-    else:
-        create_root_node(image_path=IMAGE_PATH,
-                        author=AUTHOR)
-    
-
-@cli.command()
-@click.argument('IMAGE_PATH')
-@click.option('--u',help="Author Name")
-@click.option('--m',help="Commit Message")
-def commit(IMAGE_PATH,AUTHOR,MESSAGE):
-
-    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
-       click.echo("Error: Invalid image path.")
-       return
-    else:
-        add_version(image_path=IMAGE_PATH,commit_message=MESSAGE,author=AUTHOR)
-        
-
-@cli.command()
-@click.argument('IMAGE_PATH')
-def revert(IMAGE_PATH):
-    
-    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
-       click.echo("Error: Invalid image path.")
-       return
-    else:
-        revert_by_one_save_imageGraph(image_path=IMAGE_PATH)
-
-
-@cli.command()
-@click.argument('IMAGE_PATH')
-def forward(IMAGE_PATH):
-    
-    if IMAGE_PATH is None or not os.path.isfile(IMAGE_PATH):
-       click.echo("Error: Invalid image path.")
-       return
-    else:
-        forward_head_by_one_save_imageGraph (image_path=IMAGE_PATH)
-
-        
-
+# Display the image
+# plt.imshow(img)
+# plt.show()
+image2=Image.open(path)
+image = cv.imread (path)
+image2=np.array(image2,dtype=np.uint64)
+image2=image2[:,:,:3]
+# print(image)
+print(image2)
+# print(type(image))
+# print(image.shape)
+plt.imshow(image2)
+print(image2.dtype)
+plt.show()
+# cv.imshow('Cristiano Ronaldo', image)
