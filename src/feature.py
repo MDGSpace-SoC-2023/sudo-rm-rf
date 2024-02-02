@@ -7,7 +7,7 @@ import argparse
 import os
 import numpy as np
 import click
-
+from server import pull_file, push_file
 
 def check_graph_initialise(name):
     '''
@@ -162,6 +162,17 @@ def _print_details(_head):
 def cli():
     pass
 
+
+
+@cli.command()
+@click.argument("image_path")
+def hist(image_path):
+    _graph_name=image_path.split('/')[-1].split('.')[0]
+    _gr=load_graph(_graph_name)
+    print("\n")
+    _gr.print_graph_tree(node=_gr.root_node)
+    print("\n")
+
 @cli.command()
 @click.argument("graph_name")
 def locate(graph_name):
@@ -264,6 +275,20 @@ def shift(image_path,id):
         save_graph(_gr)
 
 
+@cli.command()
+@click.argument("image_path")
+def push(image_path):
+    _graph_name=image_path.split('/')[-1].split('.')[0]
+    _path="Graphs/"+_graph_name+'.pkl'
+    push_file.upload_file(filename=_path,server_address="192.168.52.28:8000")
+    
+
+@cli.command()
+@click.argument("image_path")
+def pull(image_path):
+    _graph_name=image_path.split('/')[-1]
+    _path="Graphs/"
+    pull_file.download_file(filename=_graph_name,server_address="192.168.52.28:8000",download_dir=_path)
 
 if __name__ == "__main__":
     cli()

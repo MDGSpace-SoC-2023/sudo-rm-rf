@@ -53,6 +53,7 @@ class rootNode(graphNode):
 
 
 
+
 class imageGraph:
     def __init__(self,
                  image:np.ndarray,
@@ -171,17 +172,37 @@ class imageGraph:
         return image_ #np.ndarray
 
 
+    def print_graph_tree(self,node,indent=''):
+        """
+        Recursively prints the tree structure of a graph starting from the specified node.
+
+        Args:
+        node (graphNode): The starting node from which to print the tree structure.
+        indent (str): The indentation string to use for each level of the tree.
+        """
+        # Print the current node
+        print(indent + '+-'+ str(node.unique) )
+        child_indent = indent +'|' +' '*4
+
+        # Iterate over each child node
+
+        if(len(node.out_nodes)==0):
+            return
+        else:
+            for child in node.out_nodes:
+                self.print_graph_tree(node=child, indent=child_indent)
+
+
 
     def show_image(self):
         _all_changes=self._traverse_graph()
         image_=self.image.copy()
-        # image1=image.copy()
 
         for key in _all_changes.keys():
             i,j,k=key
             image_[i][j][k]+=_all_changes[key] 
 
-        # print(image[10][220])
-
         plt.imshow(image_)
         plt.show()
+
+    
